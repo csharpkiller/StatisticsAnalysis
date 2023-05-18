@@ -44,7 +44,7 @@ public class GetLogstfInfoTest extends TestCase {
     public void ignoreTag(){
         PlayerStats game1 = new PlayerStats(21, 24, 7391, true);
 
-        GetLogstfInfo getLogstfInfo = new GetLogstfInfo(IgnoreTags.PUGCHAMP);
+        GetLogstfInfo getLogstfInfo = new GetLogstfInfo(List.of(IgnoreTags.PUGCHAMP));
         List<PlayerStats> getStats = getLogstfInfo.getPlayerStatsAllHero("76561197987681768", 1);
         assertEquals(game1, getStats.get(0));
 
