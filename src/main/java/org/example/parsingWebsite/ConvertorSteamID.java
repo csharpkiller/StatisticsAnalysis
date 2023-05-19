@@ -1,7 +1,7 @@
 package org.example.parsingWebsite;
 
 
-public class SteamId {
+public class ConvertorSteamID {
 
     /**
      * Конвертирует steamId64 в steamID3

@@ -1,5 +1,8 @@
 package org.example.parsingWebsite;
 
+import org.example.dto.LogDto;
+import org.example.dto.MatchDto;
+import org.example.dto.PlayerMatchStatsDto;
 import org.example.statisticsAnalysis.HeroClass;
 import org.example.statisticsAnalysis.PlayerStats;
 import org.jsoup.Jsoup;
@@ -32,21 +35,20 @@ public class GetLogstfInfo {
      */
     public List<PlayerStats> getPlayerStatsAllHero(String steamID, int matchesCount){
         CreateQueryLink createQueryLink = new CreateQueryLink();
-        String queryLink = createQueryLink.getPlayerGames(steamID);
-        /*Document jsonMatchesInfo;
-        try {
-            System.out.println("Connecting...");
-            jsonMatchesInfo = Jsoup.connect(queryLink).ignoreContentType(true).get();
-        } catch (IOException e) {
-            System.out.println("Error connecting");
-            return null;
-        }*/
         Connect connect = new Connect();
+        ParseJson parseJson = new ParseJson();
+
+        String queryLink = createQueryLink.getPlayerGames(steamID);
         Document jsonMatchesInfo;
         jsonMatchesInfo = connect.getData(queryLink);
 
-        ParseJson parseJson = new ParseJson();
-        List<Long> matchIDs = parseJson.getMatchIdsList(jsonMatchesInfo);
+
+        List<Long> matchIDs = new ArrayList<>();
+        List<LogDto> logDtoList = parseJson.getMatchIdsList(jsonMatchesInfo);
+        for (LogDto logs: logDtoList
+             ) {
+            matchIDs.add(logs.getId());
+        }
         List<String> queryLinks = createQueryLink.getGame(matchIDs);
 
         List<Document> jsonMatchInfoList = new ArrayList<>();
@@ -66,8 +68,13 @@ public class GetLogstfInfo {
             }
         }
         System.out.println("Match loses: " + logsLoses);
-        List<PlayerStats> playerStats = parseJson.getStats(jsonMatchInfoList, steamID);
-        return null;
+//        List<PlayerStats> playerStats = parseJson.getStats(jsonMatchInfoList, steamID);
+        List<PlayerMatchStatsDto> playerMatchStatsDtos = parseJson.getStats(jsonMatchInfoList, steamID);
+        List<List<MatchDto>> matchStatsDtos = parseJson.getMatchInfo(jsonMatchInfoList);
+
+        GetPlayerStats getPlayerStats = new GetPlayerStats();
+        List<PlayerStats> playerStats = getPlayerStats.getPlayerStatsAllRoles(playerMatchStatsDtos, matchStatsDtos);
+        return playerStats;
     }
 
 

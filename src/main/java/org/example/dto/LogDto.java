@@ -56,5 +56,4 @@ public class LogDto {
     private long views;
     private int players;
 
-
 }

@@ -22,6 +22,7 @@ public class Connect {
             }
             return null;
         }
+        connectCount=0;
         return jsonMatchesInfo;
     }
 }
