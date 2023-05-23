@@ -2,7 +2,7 @@ package org.example.dto;
 
 import java.util.List;
 
-public class PlayerMatchStatsDto {
+public class PlayerMatchStatsDto implements PlayerMainStatistic{
     private int kills;
     private int backstabs;
     private int headshots_hit;

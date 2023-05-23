@@ -2,6 +2,7 @@ package org.example.parsingWebsite;
 
 import org.example.dto.LogDto;
 import org.example.dto.MatchDto;
+import org.example.dto.PlayerClassStatsDto;
 import org.example.dto.PlayerMatchStatsDto;
 import org.example.statisticsAnalysis.HeroClass;
 import org.example.statisticsAnalysis.PlayerStats;
@@ -25,8 +26,42 @@ public class GetLogstfInfo {
     /**
      * Возвращает список результатов за последние matchesCount матчей для определенного персонажа heroClass
      */
-    public List<PlayerStats> getPlayerStatsSpecialHero(String steamID, HeroClass heroClass, int matchesCount){
-        // TODO
+    public List<PlayerStats> getPlayerStatsSpecialHero(String steamID, HeroClass heroClass, int matchesCount, boolean offclass){
+        CreateQueryLink createQueryLink = new CreateQueryLink();
+        Connect connect = new Connect();
+        ParseJson parseJson = new ParseJson();
+
+        String matchesInfoQueryLink = createQueryLink.getPlayerGames(steamID);
+        Document jsonMatchesInfo = connect.getData(matchesInfoQueryLink);
+        List<LogDto> logDtoList = parseJson.getMatchIdsList(jsonMatchesInfo);
+        List<Long> matchIDs = new ArrayList<>();
+
+        for (LogDto log: logDtoList
+             ) {
+            matchIDs.add(log.getId());
+        }
+
+        List<String> queryLinks = createQueryLink.getGame(matchIDs);
+
+        List<Document> jsonMatchInfoList = new ArrayList<>();
+        Document jsonMatchInfo;
+        int logsLoses = 0;
+        int matchCountCanChange = matchesCount;
+        System.out.println("Looking for matches...");
+        for(int i = 0; i < matchCountCanChange; i++){
+            try {
+                jsonMatchInfo = Jsoup.connect(queryLinks.get(i)).ignoreContentType(true).get();
+                jsonMatchInfoList.add(jsonMatchInfo);
+            } catch (IOException e) {
+                logsLoses++;
+                if(matchCountCanChange < 5000){
+                    matchCountCanChange++;
+                }
+            }
+        }
+        System.out.println("Match loses: " + logsLoses);
+        PlayerClassStatsDto playerClassStatsDto = parseJson.getStats(jsonMatchInfoList.get(0), steamID, heroClass, offclass);
+
         return null;
     }
 

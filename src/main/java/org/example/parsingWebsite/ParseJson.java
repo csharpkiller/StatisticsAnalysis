@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dto.LogDto;
 import org.example.dto.MatchDto;
+import org.example.dto.PlayerClassStatsDto;
 import org.example.dto.PlayerMatchStatsDto;
+import org.example.statisticsAnalysis.HeroClass;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
@@ -87,6 +89,7 @@ public class ParseJson {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
+
         String steamID3;
         ConvertorSteamID convertorSteamID = new ConvertorSteamID();
         steamID3 = convertorSteamID.convertSteamID64toSteamID3(steamID);
@@ -107,6 +110,74 @@ public class ParseJson {
         for (Document e: jsonMaths
              ) {
             playerStats.add(getStats(e, steamID));
+        }
+        return playerStats;
+    }
+
+    /**
+     * Возвращает данные PlayerClassStatsDto из PlayerMatchStatsDto class_stats
+     * @param jsonMatch
+     * @param steamID
+     * @param heroClass
+     * @param considerOffclass
+     * @return
+     */
+    protected PlayerClassStatsDto getStats(Document jsonMatch, String steamID, HeroClass heroClass, boolean considerOffclass){
+        ObjectMapper objectMapper = new ObjectMapper();
+        PlayerClassStatsDto playerClassStatsDto;
+
+        PlayerMatchStatsDto playerMatchStatsDto = getStats(jsonMatch, steamID);
+        List<JSONObject> classStats = (ArrayList<JSONObject>) playerMatchStatsDto.getClass_stats();
+        if(!considerOffclass){
+            int index = 0;
+            int value = 0;
+            for(int i = 0; i < classStats.size(); i++){
+                int totalTIme = (int)classStats.get(i).get("total_time");
+                if(value < totalTIme){
+                    value = totalTIme;
+                    index = i;
+                }
+            }
+            HeroClass mainClass = HeroClass.valueOf(classStats.get(index).get("type").toString().toUpperCase());
+            if(heroClass.equals(mainClass)){
+                try {
+                    playerClassStatsDto = objectMapper.readValue(classStats.get(index).toString(), new TypeReference<PlayerClassStatsDto>() {
+                    });
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                return playerClassStatsDto;
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            for (JSONObject jojb: classStats
+                 ) {
+                HeroClass heroClass1 = HeroClass.valueOf(jojb.get("type").toString().toUpperCase());
+                if(heroClass1.equals(heroClass)){
+                    try {
+                        playerClassStatsDto = objectMapper.readValue(jojb.toString(), new TypeReference<PlayerClassStatsDto>() {
+                        });
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return playerClassStatsDto;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected List<PlayerClassStatsDto> getStats(List<Document> jsonMatchs, String steamID, HeroClass heroClass, boolean considerOffclass){
+        List<PlayerClassStatsDto> playerStats = new ArrayList<>();
+        for (Document doc: jsonMatchs
+             ) {
+            PlayerClassStatsDto playerClassStatsDto = getStats(doc, steamID, heroClass, considerOffclass);
+            if(playerClassStatsDto != null) {
+                playerStats.add(getStats(doc, steamID, heroClass, considerOffclass));
+            }
         }
         return playerStats;
     }

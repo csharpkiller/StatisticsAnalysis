@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.parsingWebsite.GetLogstfInfo;
 import org.example.parsingWebsite.GetPlayerStats;
+import org.example.statisticsAnalysis.HeroClass;
 import org.example.statisticsAnalysis.PlayerStats;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class App
     {
         GetLogstfInfo getLogstfInfo = new GetLogstfInfo();
         List<PlayerStats> playerStatsList = getLogstfInfo.getPlayerStatsAllHero("76561198017212697", 10);
+        List<PlayerStats> playerStatsList1 = getLogstfInfo.getPlayerStatsSpecialHero("76561198017212697", HeroClass.SCOUT, 10, false);
         System.out.println("DONE");
     }
 }

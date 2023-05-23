@@ -16,7 +16,7 @@ public class GetLogstfInfoTest extends TestCase {
     public void testGetPlayerStatsSpecialHero() {
         PlayerStats game1 = new PlayerStats(28, 23, 8081, true);
         GetLogstfInfo getLogstfInfo = new GetLogstfInfo();
-        List<PlayerStats> getStats = getLogstfInfo.getPlayerStatsSpecialHero("76561197987681768", HeroClass.SCOUT, 1);
+        List<PlayerStats> getStats = getLogstfInfo.getPlayerStatsSpecialHero("76561197987681768", HeroClass.SCOUT, 1, false);
         assertEquals(game1, getStats.get(0));
     }
 

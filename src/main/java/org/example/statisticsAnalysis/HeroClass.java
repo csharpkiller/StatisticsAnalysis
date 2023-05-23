@@ -1,6 +1,13 @@
 package org.example.statisticsAnalysis;
 
 public enum HeroClass {
-    //TODO
-    SCOUT
+    SCOUT,
+    SOLDIER,
+    PYRO,
+    DEMOMAN,
+    HEAVY,
+    ENGINIER,
+    MEDIC,
+    SNIPER,
+    SPY
 }
