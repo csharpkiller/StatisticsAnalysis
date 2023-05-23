@@ -14,6 +14,7 @@ import org.jsoup.nodes.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ParseJson {
 
@@ -132,13 +133,14 @@ public class ParseJson {
             int index = 0;
             int value = 0;
             for(int i = 0; i < classStats.size(); i++){
-                int totalTIme = (int)classStats.get(i).get("total_time");
-                if(value < totalTIme){
-                    value = totalTIme;
+                Map totalTIme = (Map)classStats.get(i);
+                int totalTime = (int)totalTIme.get("total_time");
+                if(value < totalTime){
+                    value = totalTime;
                     index = i;
                 }
             }
-            HeroClass mainClass = HeroClass.valueOf(classStats.get(index).get("type").toString().toUpperCase());
+            HeroClass mainClass = HeroClass.valueOf(((Map)classStats.get(index)).get("type").toString().toUpperCase());
             if(heroClass.equals(mainClass)){
                 try {
                     playerClassStatsDto = objectMapper.readValue(classStats.get(index).toString(), new TypeReference<PlayerClassStatsDto>() {
