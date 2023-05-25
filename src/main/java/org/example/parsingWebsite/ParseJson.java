@@ -128,7 +128,7 @@ public class ParseJson {
         PlayerClassStatsDto playerClassStatsDto;
 
         PlayerMatchStatsDto playerMatchStatsDto = getStats(jsonMatch, steamID);
-        List<JSONObject> classStats = (ArrayList<JSONObject>) playerMatchStatsDto.getClass_stats();
+        List<Map<String, Object>> classStats = (ArrayList<Map<String, Object>>) playerMatchStatsDto.getClass_stats();
         if(!considerOffclass){
             int index = 0;
             int value = 0;
@@ -143,7 +143,10 @@ public class ParseJson {
             HeroClass mainClass = HeroClass.valueOf(((Map)classStats.get(index)).get("type").toString().toUpperCase());
             if(heroClass.equals(mainClass)){
                 try {
-                    playerClassStatsDto = objectMapper.readValue(classStats.get(index).toString(), new TypeReference<PlayerClassStatsDto>() {
+                    Object classStatsObjectArray = classStats.get(index);
+                    Map classStatsMap = (Map) classStatsObjectArray;
+                    JSONObject jsonObject = new JSONObject(classStatsMap);
+                    playerClassStatsDto = objectMapper.readValue(jsonObject.toString(), new TypeReference<PlayerClassStatsDto>() {
                     });
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
@@ -155,12 +158,12 @@ public class ParseJson {
             }
         }
         else{
-            for (JSONObject jojb: classStats
+            for (Map classStatMap: classStats
                  ) {
-                HeroClass heroClass1 = HeroClass.valueOf(jojb.get("type").toString().toUpperCase());
+                HeroClass heroClass1 = HeroClass.valueOf(classStatMap.get("type").toString().toUpperCase());
                 if(heroClass1.equals(heroClass)){
                     try {
-                        playerClassStatsDto = objectMapper.readValue(jojb.toString(), new TypeReference<PlayerClassStatsDto>() {
+                        playerClassStatsDto = objectMapper.readValue(new JSONObject(classStatMap).toString(), new TypeReference<PlayerClassStatsDto>() {
                         });
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
