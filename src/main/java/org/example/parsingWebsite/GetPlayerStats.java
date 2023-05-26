@@ -1,7 +1,6 @@
 package org.example.parsingWebsite;
 
-import org.example.dto.MatchDto;
-import org.example.dto.PlayerMatchStatsDto;
+import org.example.dto.PlayerMainStatistic;
 import org.example.statisticsAnalysis.PlayerStats;
 
 import java.util.ArrayList;
@@ -10,25 +9,24 @@ import java.util.List;
 public class GetPlayerStats {
     /**
      * Выбирает из playerMatchStatsDto нужную статистику и определяет выиграл ли игрок.
-     * @param playerMatchStatsDto
-     * @param matchDtos
-     * @return
      */
-    protected PlayerStats getPlayerStatsAllRoles(PlayerMatchStatsDto playerMatchStatsDto, List<MatchDto> matchDtos){
+    protected PlayerStats getPlayerStatsAllRoles(PlayerMainStatistic playerMainStatistic){
         TeamWinner teamWinner;
 
-        if(matchDtos.get(0).getScore() == matchDtos.get(1).getScore()){
+        if(playerMainStatistic.getMatchInfo().get(0).getScore() == playerMainStatistic.getMatchInfo().get(1).getScore()){
             teamWinner = TeamWinner.DRAW;
         }else{
-            if(matchDtos.get(0).getScore() > matchDtos.get(1).getScore()){
+            if(playerMainStatistic.getMatchInfo().get(0).getScore() > playerMainStatistic.getMatchInfo().get(1).getScore()){
                 teamWinner = TeamWinner.RED;
             }
             else {
                 teamWinner = TeamWinner.BLU;
             }
         }
+
+        // заменить на Enum.valueOf...
         boolean win;
-        String playerTeam = playerMatchStatsDto.getTeam();
+        String playerTeam = playerMainStatistic.getTeam();
         if(teamWinner.equals(TeamWinner.DRAW)){
             win = true;
         }
@@ -42,13 +40,13 @@ public class GetPlayerStats {
             win = false;
         }
 
-        return new PlayerStats(playerMatchStatsDto.getKills(), playerMatchStatsDto.getDeaths(), playerMatchStatsDto.getDmg(), win);
+        return new PlayerStats(playerMainStatistic.getKills(), playerMainStatistic.getDeaths(), playerMainStatistic.getDmg(), win);
     }
 
-    protected List<PlayerStats> getPlayerStatsAllRoles(List<PlayerMatchStatsDto> playerMatchStatsDtos, List<List<MatchDto>> matchDtosList){
+    protected List<PlayerStats> getPlayerStatsAllRoles(List<PlayerMainStatistic> playerMainStatistics){
         List<PlayerStats> result = new ArrayList<>();
-        for(int i = 0; i < playerMatchStatsDtos.size(); i++){
-            result.add(getPlayerStatsAllRoles(playerMatchStatsDtos.get(i), matchDtosList.get(i)));
+        for (PlayerMainStatistic playerMainStatistic : playerMainStatistics) {
+            result.add(getPlayerStatsAllRoles(playerMainStatistic));
         }
         return result;
     }

@@ -30,22 +30,19 @@ offset	Optional Offset results (default 0)
 
     /**
      * Возвращает ссылку для запроса последних игр игрока.
-     * @param steamID
-     * @return
      */
     public String getPlayerGames(String steamID){
+        // оставим буфер, про потоки еще нужно будет подумать
         StringBuffer stringBuffer = new StringBuffer(basePlayerGamesLink);
         stringBuffer.append("player=");
         stringBuffer.append(steamID);
         stringBuffer.append("&limit=");
-        stringBuffer.append(maxLimit/5);
+        stringBuffer.append(maxLimit);
         return stringBuffer.toString();
     }
 
     /**
      * Возвращает ссылку для запроса конкретной игры.
-     * @param matchId
-     * @return
      */
     public String getGame(long matchId){
         StringBuffer stringBuffer = new StringBuffer(baseGameLink);

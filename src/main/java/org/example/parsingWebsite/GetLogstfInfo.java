@@ -1,9 +1,6 @@
 package org.example.parsingWebsite;
 
-import org.example.dto.LogDto;
-import org.example.dto.MatchDto;
-import org.example.dto.PlayerClassStatsDto;
-import org.example.dto.PlayerMatchStatsDto;
+import org.example.dto.*;
 import org.example.statisticsAnalysis.HeroClass;
 import org.example.statisticsAnalysis.PlayerStats;
 import org.jsoup.Jsoup;
@@ -30,6 +27,7 @@ public class GetLogstfInfo {
         CreateQueryLink createQueryLink = new CreateQueryLink();
         Connect connect = new Connect();
         ParseJson parseJson = new ParseJson();
+        GetPlayerStats getPlayerStats = new GetPlayerStats();
 
         String matchesInfoQueryLink = createQueryLink.getPlayerGames(steamID);
         Document jsonMatchesInfo = connect.getData(matchesInfoQueryLink);
@@ -60,9 +58,10 @@ public class GetLogstfInfo {
             }
         }
         System.out.println("Match loses: " + logsLoses);
-        PlayerClassStatsDto playerClassStatsDto = parseJson.getStats(jsonMatchInfoList.get(0), steamID, heroClass, offclass);
 
-        return null;
+        List<PlayerClassStatsDto> playerClassStatsDtoList = parseJson.getStats(jsonMatchInfoList, steamID, heroClass, offclass);
+        List<PlayerMainStatistic> playerMainStatisticList = new ArrayList<>(playerClassStatsDtoList);
+        return getPlayerStats.getPlayerStatsAllRoles(playerMainStatisticList);
     }
 
     /**
@@ -103,19 +102,17 @@ public class GetLogstfInfo {
             }
         }
         System.out.println("Match loses: " + logsLoses);
-//        List<PlayerStats> playerStats = parseJson.getStats(jsonMatchInfoList, steamID);
+
         List<PlayerMatchStatsDto> playerMatchStatsDtos = parseJson.getStats(jsonMatchInfoList, steamID);
-        List<List<MatchDto>> matchStatsDtos = parseJson.getMatchInfo(jsonMatchInfoList);
+        List<PlayerMainStatistic> playerMainStatistics = new ArrayList<>(playerMatchStatsDtos);
 
         GetPlayerStats getPlayerStats = new GetPlayerStats();
-        List<PlayerStats> playerStats = getPlayerStats.getPlayerStatsAllRoles(playerMatchStatsDtos, matchStatsDtos);
-        return playerStats;
+        return getPlayerStats.getPlayerStatsAllRoles(playerMainStatistics);
     }
 
 
     /**
      * Добавить игнорируемый тэг
-     * @param ignoreTags
      */
     public void addIgnoreTag(IgnoreTags ignoreTags){
         this.ignoreTags.add(ignoreTags);

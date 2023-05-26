@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ParseJson {
-
+    // DEBUGING
+    public static int COUNTER = 0;
+    // DEBUGING
     /**
      * Парсит jsonDoc по тегу "logs" и возвращает LogDto Obj
-     * @param jsonDoc
-     * @return
      */
     protected List<LogDto> getMatchIdsList(Document jsonDoc){
 
@@ -46,6 +46,9 @@ public class ParseJson {
      * @return
      */
     protected List<MatchDto> getMatchInfo(Document jsonMatch){
+        // DEBUGING
+        COUNTER++;
+        // DEBUGING
         String jsonString = jsonMatch.body().text();
         JSONObject obj = new JSONObject(jsonString);
         JSONObject teamsInfo = (JSONObject) obj.get("teams");
@@ -56,9 +59,9 @@ public class ParseJson {
         MatchDto redTeamDto;
         MatchDto bluTeamDto;
         try {
-            redTeamDto = objectMapper.readValue(redTeam.toString(), new TypeReference<MatchDto>() {
+            redTeamDto = objectMapper.readValue(redTeam.toString(), new TypeReference<>() {
             });
-            bluTeamDto = objectMapper.readValue(bluTeam.toString(), new TypeReference<MatchDto>() {
+            bluTeamDto = objectMapper.readValue(bluTeam.toString(), new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -79,9 +82,6 @@ public class ParseJson {
     /**
      * Парсит jsonDoc по тегу "players", находит игрока с id - steamID,
      * возвращает статистику игрока PlayerMatchStatsDto
-     * @param jsonMatch
-     * @param steamID
-     * @return
      */
     protected PlayerMatchStatsDto getStats(Document jsonMatch, String steamID){
         String jsonString = jsonMatch.body().text();
@@ -97,12 +97,14 @@ public class ParseJson {
         JSONObject playerStatsJson = (JSONObject) playersInfo.get(steamID3);
         PlayerMatchStatsDto playerResults;
         try {
-            playerResults = objectMapper.readValue(playerStatsJson.toString(), new TypeReference<PlayerMatchStatsDto>() {
+            playerResults = objectMapper.readValue(playerStatsJson.toString(), new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
+        List<MatchDto> matchDto = getMatchInfo(jsonMatch);
+        playerResults.setMatchInfo(matchDto);
         return playerResults;
     }
 
@@ -117,15 +119,11 @@ public class ParseJson {
 
     /**
      * Возвращает данные PlayerClassStatsDto из PlayerMatchStatsDto class_stats
-     * @param jsonMatch
-     * @param steamID
-     * @param heroClass
-     * @param considerOffclass
-     * @return
      */
     protected PlayerClassStatsDto getStats(Document jsonMatch, String steamID, HeroClass heroClass, boolean considerOffclass){
         ObjectMapper objectMapper = new ObjectMapper();
         PlayerClassStatsDto playerClassStatsDto;
+        List<MatchDto> matchDto = getMatchInfo(jsonMatch);
 
         PlayerMatchStatsDto playerMatchStatsDto = getStats(jsonMatch, steamID);
         List<Map<String, Object>> classStats = (ArrayList<Map<String, Object>>) playerMatchStatsDto.getClass_stats();
@@ -143,14 +141,16 @@ public class ParseJson {
             HeroClass mainClass = HeroClass.valueOf(((Map)classStats.get(index)).get("type").toString().toUpperCase());
             if(heroClass.equals(mainClass)){
                 try {
-                    Object classStatsObjectArray = classStats.get(index);
-                    Map classStatsMap = (Map) classStatsObjectArray;
+                    Object classStatsObjectMap = classStats.get(index);
+                    Map classStatsMap = (Map) classStatsObjectMap;
                     JSONObject jsonObject = new JSONObject(classStatsMap);
                     playerClassStatsDto = objectMapper.readValue(jsonObject.toString(), new TypeReference<PlayerClassStatsDto>() {
                     });
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
+                playerClassStatsDto.setTeam(playerMatchStatsDto.getTeam());
+                playerClassStatsDto.setMatchInfo(matchDto);
                 return playerClassStatsDto;
             }
             else{
@@ -168,6 +168,8 @@ public class ParseJson {
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
+                    playerClassStatsDto.setTeam(playerMatchStatsDto.getTeam());
+                    playerClassStatsDto.setMatchInfo(matchDto);
                     return playerClassStatsDto;
                 }
             }
@@ -175,9 +177,9 @@ public class ParseJson {
         return null;
     }
 
-    protected List<PlayerClassStatsDto> getStats(List<Document> jsonMatchs, String steamID, HeroClass heroClass, boolean considerOffclass){
+    protected List<PlayerClassStatsDto> getStats(List<Document> jsonMatches, String steamID, HeroClass heroClass, boolean considerOffclass){
         List<PlayerClassStatsDto> playerStats = new ArrayList<>();
-        for (Document doc: jsonMatchs
+        for (Document doc: jsonMatches
              ) {
             PlayerClassStatsDto playerClassStatsDto = getStats(doc, steamID, heroClass, considerOffclass);
             if(playerClassStatsDto != null) {

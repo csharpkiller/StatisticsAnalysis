@@ -1,5 +1,7 @@
 package org.example.dto;
 
+import java.util.List;
+
 public class PlayerClassStatsDto implements PlayerMainStatistic{
     private int kills;
     private Object weapon;
@@ -8,6 +10,8 @@ public class PlayerClassStatsDto implements PlayerMainStatistic{
     private int total_time;
     private int deaths;
     private int dmg;
+    private List<MatchDto> matchInfo;
+    private String team;
 
     public int getKills() {
         return kills;
@@ -63,5 +67,23 @@ public class PlayerClassStatsDto implements PlayerMainStatistic{
 
     public void setDmg(int dmg) {
         this.dmg = dmg;
+    }
+
+    @Override
+    public List<MatchDto> getMatchInfo() {
+        return matchInfo;
+    }
+
+    public void setMatchInfo(List<MatchDto> matchInfo) {
+        this.matchInfo = matchInfo;
+    }
+
+    @Override
+    public String getTeam() {
+        return team;
+    }
+
+    public void setTeam(String team) {
+        this.team = team;
     }
 }

@@ -19,6 +19,7 @@ public class PlayerMatchStatsDto implements PlayerMainStatistic{
     private int cpc;
     private int heal;
     private int ic;
+    private Object medicstats;
     private int deaths;
     private double kpd;
     private int dapd;
@@ -32,6 +33,7 @@ public class PlayerMatchStatsDto implements PlayerMainStatistic{
     private int dt_real;
     private int medkits;
     private int dmg;
+    private List<MatchDto> matchInfo;
 
     public int getKills() {
         return kills;
@@ -259,6 +261,22 @@ public class PlayerMatchStatsDto implements PlayerMainStatistic{
 
     public int getDmg() {
         return dmg;
+    }
+
+    public void setMatchInfo(List<MatchDto> matchInfo) {
+        this.matchInfo = matchInfo;
+    }
+
+    public Object getMedicstats() {
+        return medicstats;
+    }
+
+    public void setMedicstats(Object medicstats) {
+        this.medicstats = medicstats;
+    }
+
+    public List<MatchDto> getMatchInfo() {
+        return matchInfo;
     }
 
     public void setDmg(int dmg) {
