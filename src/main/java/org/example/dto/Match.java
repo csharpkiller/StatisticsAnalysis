@@ -1,6 +1,6 @@
 package org.example.dto;
 
-public class MatchDto {
+public class Match {
     private int charges;
     private int drops;
     private int firstcaps;

@@ -30,6 +30,7 @@ offset	Optional Offset results (default 0)
 
     /**
      * Возвращает ссылку для запроса последних игр игрока.
+     * maxLimit - кол-во последних игр, задаем пока сами.
      */
     public String getPlayerGames(String steamID){
         // оставим буфер, про потоки еще нужно будет подумать

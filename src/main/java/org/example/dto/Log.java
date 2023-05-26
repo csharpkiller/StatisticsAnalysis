@@ -1,6 +1,6 @@
 package org.example.dto;
 
-public class LogDto {
+public class Log {
     public long getId() {
         return id;
     }

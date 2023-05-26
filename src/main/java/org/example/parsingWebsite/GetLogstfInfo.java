@@ -21,7 +21,10 @@ public class GetLogstfInfo {
     }
 
     /**
-     * Возвращает список результатов за последние matchesCount матчей для определенного персонажа heroClass
+     * Возвращает список результатов за последние matchCount игр, играя за определенного HeroClass "персонажа".
+     * offclass - во время игры можно менять персонажей, как правело это происходит краткосрочно: примерно 5 - 10 минут от
+     * матча в длиной в 30 минут. Все вторичные персонажи, которые использовались называются offclass.
+     * boolean offclass указывает учитывать ли этих "сторонних персонажей" для учета статистики.
      */
     public List<PlayerStats> getPlayerStatsSpecialHero(String steamID, HeroClass heroClass, int matchesCount, boolean offclass){
         CreateQueryLink createQueryLink = new CreateQueryLink();
@@ -31,10 +34,10 @@ public class GetLogstfInfo {
 
         String matchesInfoQueryLink = createQueryLink.getPlayerGames(steamID);
         Document jsonMatchesInfo = connect.getData(matchesInfoQueryLink);
-        List<LogDto> logDtoList = parseJson.getMatchIdsList(jsonMatchesInfo);
+        List<Log> logList = parseJson.getMatchIdsList(jsonMatchesInfo);
         List<Long> matchIDs = new ArrayList<>();
 
-        for (LogDto log: logDtoList
+        for (Log log: logList
              ) {
             matchIDs.add(log.getId());
         }
@@ -59,13 +62,13 @@ public class GetLogstfInfo {
         }
         System.out.println("Match loses: " + logsLoses);
 
-        List<PlayerClassStatsDto> playerClassStatsDtoList = parseJson.getStats(jsonMatchInfoList, steamID, heroClass, offclass);
-        List<PlayerMainStatistic> playerMainStatisticList = new ArrayList<>(playerClassStatsDtoList);
+        List<PlayerClassStats> playerClassStatsList = parseJson.getStats(jsonMatchInfoList, steamID, heroClass, offclass);
+        List<PlayerMainStatistic> playerMainStatisticList = new ArrayList<>(playerClassStatsList);
         return getPlayerStats.getPlayerStatsAllRoles(playerMainStatisticList);
     }
 
     /**
-     * Возвращает список результатов за последние matchesCount
+     * Возвращает список результатов за последние matchesCount.
      */
     public List<PlayerStats> getPlayerStatsAllHero(String steamID, int matchesCount){
         CreateQueryLink createQueryLink = new CreateQueryLink();
@@ -78,8 +81,8 @@ public class GetLogstfInfo {
 
 
         List<Long> matchIDs = new ArrayList<>();
-        List<LogDto> logDtoList = parseJson.getMatchIdsList(jsonMatchesInfo);
-        for (LogDto logs: logDtoList
+        List<Log> logList = parseJson.getMatchIdsList(jsonMatchesInfo);
+        for (Log logs: logList
              ) {
             matchIDs.add(logs.getId());
         }
@@ -103,8 +106,8 @@ public class GetLogstfInfo {
         }
         System.out.println("Match loses: " + logsLoses);
 
-        List<PlayerMatchStatsDto> playerMatchStatsDtos = parseJson.getStats(jsonMatchInfoList, steamID);
-        List<PlayerMainStatistic> playerMainStatistics = new ArrayList<>(playerMatchStatsDtos);
+        List<PlayerMatchStats> playerMatchStats = parseJson.getStats(jsonMatchInfoList, steamID);
+        List<PlayerMainStatistic> playerMainStatistics = new ArrayList<>(playerMatchStats);
 
         GetPlayerStats getPlayerStats = new GetPlayerStats();
         return getPlayerStats.getPlayerStatsAllRoles(playerMainStatistics);

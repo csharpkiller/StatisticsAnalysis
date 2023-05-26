@@ -17,7 +17,7 @@ public class App
     {
         GetLogstfInfo getLogstfInfo = new GetLogstfInfo();
         //List<PlayerStats> playerStatsList = getLogstfInfo.getPlayerStatsAllHero("76561198017212697", 10);
-        List<PlayerStats> playerStatsList1 = getLogstfInfo.getPlayerStatsSpecialHero("76561198017212697", HeroClass.SOLDIER, 50, false);
+        List<PlayerStats> playerStatsList1 = getLogstfInfo.getPlayerStatsSpecialHero("76561198017212697", HeroClass.SOLDIER, 200, false);
         System.out.println("DONE");
     }
 }

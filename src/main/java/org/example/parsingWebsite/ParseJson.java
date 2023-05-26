@@ -3,10 +3,10 @@ package org.example.parsingWebsite;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.dto.LogDto;
-import org.example.dto.MatchDto;
-import org.example.dto.PlayerClassStatsDto;
-import org.example.dto.PlayerMatchStatsDto;
+import org.example.dto.Log;
+import org.example.dto.Match;
+import org.example.dto.PlayerClassStats;
+import org.example.dto.PlayerMatchStats;
 import org.example.statisticsAnalysis.HeroClass;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,47 +17,48 @@ import java.util.List;
 import java.util.Map;
 
 public class ParseJson {
-    // DEBUGING
-    public static int COUNTER = 0;
-    // DEBUGING
+
     /**
-     * Парсит jsonDoc по тегу "logs" и возвращает LogDto Obj
+     * Парсит jsonDoc по тегу "logs" и возвращает список объектов Log Obj.
      */
-    protected List<LogDto> getMatchIdsList(Document jsonDoc){
+    protected List<Log> getMatchIdsList(Document jsonDoc){
 
         String jsonString = jsonDoc.body().text();
         JSONObject obj = new JSONObject(jsonString);
         JSONArray jsonArray =  (JSONArray) obj.get("logs");
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<LogDto> logDtoList;
+        List<Log> logList;
         try {
-            logDtoList = objectMapper.readValue(jsonArray.toString(), (new TypeReference<List<LogDto>>() {
+            logList = objectMapper.readValue(jsonArray.toString(), (new TypeReference<List<Log>>() {
             }));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        return logDtoList;
+        return logList;
     }
 
     /**
-     * Парсит jsonDoc по тегу "teams" и возвращает 2 MatchDto obj для команд Red и Blu
-     * @param jsonMatch
-     * @return
+     * Парсит jsonDoc по тегу "teams" и возвращает 2 объекта Match.
+     *  1 элемент листа информация команды Red
+     *  2 элемент листа информация команды Blu
+     *  Можно сделать отдельный класс по типу Pair для более очевидного вывода результата.
      */
-    protected List<MatchDto> getMatchInfo(Document jsonMatch){
-        // DEBUGING
-        COUNTER++;
-        // DEBUGING
+    protected List<Match> getMatchInfo(Document jsonMatch){
+        JSONObject obj;
         String jsonString = jsonMatch.body().text();
-        JSONObject obj = new JSONObject(jsonString);
+        try {
+            obj = new JSONObject(jsonString);
+        }catch (Exception e){
+            return null;
+        }
         JSONObject teamsInfo = (JSONObject) obj.get("teams");
         Object redTeam = teamsInfo.get("Red");
         Object bluTeam = teamsInfo.get("Blue");
 
         ObjectMapper objectMapper = new ObjectMapper();
-        MatchDto redTeamDto;
-        MatchDto bluTeamDto;
+        Match redTeamDto;
+        Match bluTeamDto;
         try {
             redTeamDto = objectMapper.readValue(redTeam.toString(), new TypeReference<>() {
             });
@@ -69,8 +70,14 @@ public class ParseJson {
         return List.of(redTeamDto, bluTeamDto);
     }
 
-    protected List<List<MatchDto>> getMatchInfo(List<Document> jsonMatchList){
-        List<List<MatchDto>> result = new ArrayList<>();
+    /**
+     * Парсит список jsonDoc по тегу "teams" и возвращает список из 2 объекта Match.
+     *  1 элемент листа информация команды Red
+     *  2 элемент листа информация команды Blu
+     *  Можно сделать отдельный класс по типу Pair для более очевидного вывода результата.
+     */
+    protected List<List<Match>> getMatchInfo(List<Document> jsonMatchList){
+        List<List<Match>> result = new ArrayList<>();
         for (Document doc: jsonMatchList
              ) {
             result.add(getMatchInfo(doc));
@@ -81,9 +88,13 @@ public class ParseJson {
 
     /**
      * Парсит jsonDoc по тегу "players", находит игрока с id - steamID,
-     * возвращает статистику игрока PlayerMatchStatsDto
+     * возвращает статистику игрока в объект PlayerMatchStats
      */
-    protected PlayerMatchStatsDto getStats(Document jsonMatch, String steamID){
+    protected PlayerMatchStats getStats(Document jsonMatch, String steamID){
+        List<Match> match = getMatchInfo(jsonMatch);
+        if(match == null){
+            return null;
+        }
         String jsonString = jsonMatch.body().text();
         JSONObject obj = new JSONObject(jsonString);
         JSONObject playersInfo = (JSONObject) obj.get("players");
@@ -95,7 +106,7 @@ public class ParseJson {
         ConvertorSteamID convertorSteamID = new ConvertorSteamID();
         steamID3 = convertorSteamID.convertSteamID64toSteamID3(steamID);
         JSONObject playerStatsJson = (JSONObject) playersInfo.get(steamID3);
-        PlayerMatchStatsDto playerResults;
+        PlayerMatchStats playerResults;
         try {
             playerResults = objectMapper.readValue(playerStatsJson.toString(), new TypeReference<>() {
             });
@@ -103,30 +114,40 @@ public class ParseJson {
             throw new RuntimeException(e);
         }
 
-        List<MatchDto> matchDto = getMatchInfo(jsonMatch);
-        playerResults.setMatchInfo(matchDto);
+        playerResults.setMatchInfo(match);
         return playerResults;
     }
 
-    protected List<PlayerMatchStatsDto> getStats(List<Document> jsonMaths, String steamID){
-        List<PlayerMatchStatsDto> playerStats = new ArrayList<>();
+    /**
+     * Парсит список jsonDoc по тегу "players", находит игрока с id - steamID,
+     * возвращает статистику игрока списком объектов PlayerMatchStats
+     */
+    protected List<PlayerMatchStats> getStats(List<Document> jsonMaths, String steamID){
+        List<PlayerMatchStats> playerStats = new ArrayList<>();
         for (Document e: jsonMaths
              ) {
-            playerStats.add(getStats(e, steamID));
+            if(e !=null) {
+                playerStats.add(getStats(e, steamID));
+            }
         }
         return playerStats;
     }
 
     /**
-     * Возвращает данные PlayerClassStatsDto из PlayerMatchStatsDto class_stats
+     * PlayerMatchStats содержит Object class_stats.
+     * Метод парсит jsonMatch по тегу "players", находит игрока с id - steamID,
+     * после получает PlayerMatchStats и парсит поле class_stats в PlayerClassStats.
      */
-    protected PlayerClassStatsDto getStats(Document jsonMatch, String steamID, HeroClass heroClass, boolean considerOffclass){
+    protected PlayerClassStats getStats(Document jsonMatch, String steamID, HeroClass heroClass, boolean considerOffclass){
+        List<Match> match = getMatchInfo(jsonMatch);
+        if(match == null){
+            return null;
+        }
         ObjectMapper objectMapper = new ObjectMapper();
-        PlayerClassStatsDto playerClassStatsDto;
-        List<MatchDto> matchDto = getMatchInfo(jsonMatch);
+        PlayerClassStats playerClassStats;
 
-        PlayerMatchStatsDto playerMatchStatsDto = getStats(jsonMatch, steamID);
-        List<Map<String, Object>> classStats = (ArrayList<Map<String, Object>>) playerMatchStatsDto.getClass_stats();
+        PlayerMatchStats playerMatchStats = getStats(jsonMatch, steamID);
+        List<Map<String, Object>> classStats = (ArrayList<Map<String, Object>>) playerMatchStats.getClass_stats();
         if(!considerOffclass){
             int index = 0;
             int value = 0;
@@ -144,14 +165,14 @@ public class ParseJson {
                     Object classStatsObjectMap = classStats.get(index);
                     Map classStatsMap = (Map) classStatsObjectMap;
                     JSONObject jsonObject = new JSONObject(classStatsMap);
-                    playerClassStatsDto = objectMapper.readValue(jsonObject.toString(), new TypeReference<PlayerClassStatsDto>() {
+                    playerClassStats = objectMapper.readValue(jsonObject.toString(), new TypeReference<PlayerClassStats>() {
                     });
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
-                playerClassStatsDto.setTeam(playerMatchStatsDto.getTeam());
-                playerClassStatsDto.setMatchInfo(matchDto);
-                return playerClassStatsDto;
+                playerClassStats.setTeam(playerMatchStats.getTeam());
+                playerClassStats.setMatchInfo(match);
+                return playerClassStats;
             }
             else{
                 return null;
@@ -163,26 +184,31 @@ public class ParseJson {
                 HeroClass heroClass1 = HeroClass.valueOf(classStatMap.get("type").toString().toUpperCase());
                 if(heroClass1.equals(heroClass)){
                     try {
-                        playerClassStatsDto = objectMapper.readValue(new JSONObject(classStatMap).toString(), new TypeReference<PlayerClassStatsDto>() {
+                        playerClassStats = objectMapper.readValue(new JSONObject(classStatMap).toString(), new TypeReference<PlayerClassStats>() {
                         });
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
-                    playerClassStatsDto.setTeam(playerMatchStatsDto.getTeam());
-                    playerClassStatsDto.setMatchInfo(matchDto);
-                    return playerClassStatsDto;
+                    playerClassStats.setTeam(playerMatchStats.getTeam());
+                    playerClassStats.setMatchInfo(match);
+                    return playerClassStats;
                 }
             }
         }
         return null;
     }
 
-    protected List<PlayerClassStatsDto> getStats(List<Document> jsonMatches, String steamID, HeroClass heroClass, boolean considerOffclass){
-        List<PlayerClassStatsDto> playerStats = new ArrayList<>();
+    /**
+     * PlayerMatchStats содержит Object class_stats.
+     * Метод парсит список jsonMatch по тегу "players", находит игрока с id - steamID,
+     * после получает список PlayerMatchStats и парсит поле class_stats в список PlayerClassStats.
+     */
+    protected List<PlayerClassStats> getStats(List<Document> jsonMatches, String steamID, HeroClass heroClass, boolean considerOffclass){
+        List<PlayerClassStats> playerStats = new ArrayList<>();
         for (Document doc: jsonMatches
              ) {
-            PlayerClassStatsDto playerClassStatsDto = getStats(doc, steamID, heroClass, considerOffclass);
-            if(playerClassStatsDto != null) {
+            PlayerClassStats playerClassStats = getStats(doc, steamID, heroClass, considerOffclass);
+            if(playerClassStats != null) {
                 playerStats.add(getStats(doc, steamID, heroClass, considerOffclass));
             }
         }

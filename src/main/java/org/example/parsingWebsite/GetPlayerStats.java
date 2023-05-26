@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GetPlayerStats {
     /**
-     * Выбирает из playerMatchStatsDto нужную статистику и определяет выиграл ли игрок.
+     *  Определяет выиграл ли игрок в матче и возвращает нужную информацию для анализа.
      */
     protected PlayerStats getPlayerStatsAllRoles(PlayerMainStatistic playerMainStatistic){
         TeamWinner teamWinner;
@@ -43,6 +43,9 @@ public class GetPlayerStats {
         return new PlayerStats(playerMainStatistic.getKills(), playerMainStatistic.getDeaths(), playerMainStatistic.getDmg(), win);
     }
 
+    /**
+     *  Определяет выиграл ли игрок в матче и возвращает нужную информацию для анализа.
+     */
     protected List<PlayerStats> getPlayerStatsAllRoles(List<PlayerMainStatistic> playerMainStatistics){
         List<PlayerStats> result = new ArrayList<>();
         for (PlayerMainStatistic playerMainStatistic : playerMainStatistics) {

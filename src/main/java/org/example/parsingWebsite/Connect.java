@@ -8,6 +8,9 @@ import java.io.IOException;
 public class Connect {
     private int connectCount = 0;
 
+    /**
+     *  Отправляет запрос по ссылке query и возвращает информацию Document ( JSONObject ).
+     */
     public Document getData (String query){
         Document jsonMatchesInfo;
         try {
