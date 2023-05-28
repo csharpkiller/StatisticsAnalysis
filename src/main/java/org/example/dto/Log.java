@@ -1,5 +1,8 @@
 package org.example.dto;
 
+/**
+ * Хранит информацию поля logs JSONObject-а, при запросе последних N матчей игрока.
+ */
 public class Log {
     public long getId() {
         return id;

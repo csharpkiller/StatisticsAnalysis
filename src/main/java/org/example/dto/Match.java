@@ -1,5 +1,8 @@
 package org.example.dto;
 
+/**
+ * Хранит информацию JSONObject-а
+ */
 public class Match {
     private int charges;
     private int drops;

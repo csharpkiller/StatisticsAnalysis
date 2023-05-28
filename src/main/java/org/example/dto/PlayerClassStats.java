@@ -2,6 +2,9 @@ package org.example.dto;
 
 import java.util.List;
 
+/**
+ * Хранит информацию JSONObject-а
+ */
 public class PlayerClassStats implements PlayerMainStatistic{
     private int kills;
     private Object weapon;

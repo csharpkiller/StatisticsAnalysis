@@ -3,27 +3,10 @@ package org.example.parsingWebsite;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Генерирует ссылки для запроса
+ */
 public class CreateQueryLink {
-    /*
-    Log data API
-Access raw JSON data of logs: http://logs.tf/api/v1/log/<log_id> OR http://logs.tf/json/<log_id>.
-
-Log search API
-Access JSON list of logs: http://logs.tf/api/v1/log?title=X&uploader=Y&player=Z&limit=N&offset=N
-
-Any of these fields can be combined together or omitted.
-
-Results are always ordered by log id descending.
-
-Example of comma-separated SteamIDs: 76561197987681768,76561197996199110
-
-title	Optional Title text search (min. 2 characters)
-map	Optional Exact name of a map
-uploader	Optional Uploader SteamID64
-player	Optional One or more player SteamID64 values, comma-separated
-limit	Optional Limit results (default 1000, maximum 10000)
-offset	Optional Offset results (default 0)
-     */
     private final String basePlayerGamesLink = "http://logs.tf/api/v1/log?";
     private final String baseGameLink = "http://logs.tf/json/";
     private final int maxLimit = 10000;

@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Переносит информацию из JSONObject (текста) в реальные объекты см package dto
+ */
 public class ParseJson {
 
     /**
@@ -24,7 +27,18 @@ public class ParseJson {
     protected List<Log> getMatchIdsList(Document jsonDoc){
 
         String jsonString = jsonDoc.body().text();
-        JSONObject obj = new JSONObject(jsonString);
+        JSONObject obj;
+
+        // TODO
+        /**
+         * ПАДАЕТ ОШИБКА ДЛЯ МОЕГО STEAMID 76561198146466689 надо очень сильно вникнуть и пофиксить..
+         */
+        try {
+            obj = new JSONObject(jsonString);
+        }
+        catch (Exception e){
+            return null;
+        }
         JSONArray jsonArray =  (JSONArray) obj.get("logs");
 
         ObjectMapper objectMapper = new ObjectMapper();

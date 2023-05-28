@@ -6,6 +6,9 @@ import org.example.statisticsAnalysis.PlayerStats;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Дополняет и конвертирует статистику в нужный нам объект.
+ */
 public class GetPlayerStats {
     /**
      *  Определяет выиграл ли игрок в матче и возвращает нужную информацию для анализа.
@@ -24,7 +27,7 @@ public class GetPlayerStats {
             }
         }
 
-        // заменить на Enum.valueOf...
+        // заменить на Enum.valueOf... TODO
         boolean win;
         String playerTeam = playerMainStatistic.getTeam();
         if(teamWinner.equals(TeamWinner.DRAW)){
